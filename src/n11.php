@@ -16,7 +16,8 @@ class N11 {
     'CategoryService' => 'https://api.n11.com/ws/CategoryService.wsdl',
     'CityService' => 'https://api.n11.com/ws/CityService.wsdl',
     'ProductService' => 'https://api.n11.com/ws/ProductService.wsdl',
-    'OrderService' => 'https://api.n11.com/ws/OrderService.wsdl'
+    'OrderService' => 'https://api.n11.com/ws/OrderService.wsdl',
+    'ProductStockService' => 'https://api.n11.com/ws/ProductStockService.wsdl'
   );
 
   function __construct($conf) {
@@ -35,49 +36,97 @@ class N11 {
 
   public function GetTopLevelCategories() {
       $this->setUrl($this->urls['CategoryService']);
-      return $this->client->GetTopLevelCategories($this->_parameters);
+      return (isset($this->_sclient) ? $this->_sclient->GetTopLevelCategories($this->_parameters) : null);
+
+  }
+
+  public function GetCategoryAttributes($id = null){
+      $this->setUrl($this->urls['CategoryService']);
+      $this->_parameters['categoryId'] = $id;
+      return (isset($this->_sclient) ? $this->_sclient->GetCategoryAttributes($this->_parameters) : null);
   }
 
   public function GetCities() {
       $this->setUrl($this->urls['CityService']);
-      return $this->client->GetCities($this->_parameters);
+      return (isset($this->_sclient) ? $this->_sclient->GetCities($this->_parameters) : null);
   }
 
   public function GetProductList($itemsPerPage, $currentPage) {
       $this->setUrl($this->urls['ProductService']);
-      $this->parameters['pagingData'] = ['itemsPerPage' => $itemsPerPage, 'currentPage' => $currentPage];
-      return $this->client->GetProductList($this->parameters);
+      $this->_parameters['pagingData'] = ['itemsPerPage' => $itemsPerPage, 'currentPage' => $currentPage];
+      return (isset($this->_sclient) ? $this->_sclient->GetProductList($this->_parameters) : null );
   }
 
   public function GetProductBySellerCode($sellerCode) {
       $this->setUrl($this->urls['ProductService']);
-      $this->parameters['sellerCode'] = $sellerCode;
-      return $this->client->GetProductBySellerCode($this->_parameters);
+      $this->_parameters['sellerCode'] = $sellerCode;
+      return (isset($this->_sclient) ? $this->_sclient->GetProductBySellerCode($this->_parameters): null );
   }
 
   public function SaveProduct(array $product = Array()) {
       $this->setUrl($this->urls['ProductService']);
-      $this->parameters['product'] = $product;
-      return $this->client->SaveProduct($this->_parameters);
+      $this->_parameters['product'] = $product;
+      return (isset($this->_sclient) ? $this->_sclient->SaveProduct($this->_parameters) : null );
   }
 
-  public function DeleteProductBySellerCode($sellerCode) {
-      $this->setUrl($this->$urls['ProductService']);
-      $this->$parameters['productSellerCode'] = $sellerCode;
-      return $this->$client->DeleteProductBySellerCode($this->$_parameters);
+  public function DeleteProduct($sellerCode) {
+      $this->setUrl($this->urls['ProductService']);
+      $this->_parameters['productId'] = $sellerCode;
+      return (isset($this->_sclient) ? $this->_sclient->DeleteProductById($this->_parameters) : null);
   }
 
-  public function OrderList(array $searchData = Array()) {
-      $this->setUrl($this->$urls['OrderService']);
-      $this->$parameters['searchData'] = $searchData;
-      return $this->$client->OrderList($this->$_parameters);
+  public function OrderList(array $searchData = Array(
+        'status' => 'New',
+        'buyerName' => '',
+        'orderNumber' => '',
+        'recipient' => '',
+        'productSellerCode' => '',
+        'period' => Array(
+            'startDate' => '',
+            'endDate' => ''
+          )
+      ), array $pagingData = Array()) {
+
+      $this->setUrl($this->urls['OrderService']);
+      $this->_parameters['searchData'] = $searchData;
+      $this->_parameters['pagingData'] = $pagingData;
+      return (isset($this->_sclient) ? $this->_sclient->OrderList($this->_parameters) : null );
+  }
+
+  public function DetailedOrderList(array $searchData = Array(
+        'status' => 'New',
+        'buyerName' => '',
+        'orderNumber' => '',
+        'recipient' => '',
+        'productSellerCode' => '',
+        'period' => Array(
+        'startDate' => '',
+        'endDate' => ''
+        )
+      ), array $pagingData = Array()){
+    $this->setUrl($this->urls['OrderService']);
+    $this->_parameters['searchData'] = $searchData;
+    return (isset($this->_sclient) ? $this->_sclient->DetailedOrderList($this->_parameters) : null );
+  }
+
+  public function OrderDetail($id = null){
+    $this->setUrl($this->urls['OrderService']);
+    $this->_parameters['orderRequest'] = array('id' => $id);
+    return (isset($this->_sclient) ? $this->_sclient->OrderDetail($this->_parameters) : null );
   }
 
   public function GetSubCategory($id = null){
     $this->setUrl($this->urls['CategoryService']);
-    $this->parameters['categoryId'] = $id;
-    return $this->client->GetSubCategories($this->_parameters);
+    $this->_parameters['categoryId'] = $id;
+    return (isset($this->_sclient) ? $this->_sclient->GetSubCategories($this->_parameters) : null);
   }
+
+  public function UpdateStockByStockId($params = null){
+    $this->setUrl($this->urls['ProductStockService']);
+    $this->_parameters['stockItems'] = $params['stockItem'];
+    return (isset($this->_sclient) ? $this->_sclient->UpdateStockByStockId($this->_parameters) : null);
+  }
+
 
   public function __destruct() {
       if ($this->debug) {
