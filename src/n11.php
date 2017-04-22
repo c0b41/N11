@@ -27,11 +27,7 @@ class N11 {
   }
 
   private function setUrl($url){
-    if($this->checkOnline($url)){
       $this->client = new SoapClient($url);
-    } else {
-      exit();
-    }
   }
 
   public function GetTopLevelCategories() {
@@ -143,20 +139,5 @@ class N11 {
       return true;
     }
   }
-
-  private function checkOnline($domain) {
-     $curlInit = curl_init($domain);
-     curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
-     curl_setopt($curlInit,CURLOPT_HEADER,true);
-     curl_setopt($curlInit,CURLOPT_NOBODY,true);
-     curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
-     $response = curl_exec($curlInit);
-     curl_close($curlInit);
-     if ($response) return true;
-     return false;
-  }
-
-  function display(){
-    return 'dfgdfg';
-  }
+  
 }

@@ -1,5 +1,5 @@
 {
-    "name": "c0b41/n11",
+    "name": "c0b41/sm-n11",
     "description": "Laravel N11 Service Provider",
     "type": "laravel",
     "license": "MIT",
@@ -9,6 +9,14 @@
             "email": "ayhankuru@yandex.com.tr"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {}
+     "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SM\\N11\\": "src"
+        }
+    },
+    "minimum-stability": "dev"
 }
