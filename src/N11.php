@@ -20,7 +20,7 @@ class N11 {
     'ProductStockService' => 'https://api.n11.com/ws/ProductStockService.wsdl'
   );
 
-  function __construct($conf) {
+  function __construct($conf = null) {
     if($this->checkConfig($conf)){
       $this->_parameters = ['auth' => ['appKey' => $this->appKey, 'appSecret' => $this->appSecret]];
     }
@@ -32,42 +32,43 @@ class N11 {
 
   public function GetAllCategories(){
 
-     $toplevelcats = $this->GetTopLevelCategories()->categoryList->category;
-     $categories = [];
+    $toplevelcats = $this->GetTopLevelCategories()->categoryList->category;
 
-      function subShow($id, $name, $chunk, $that){
-        $result = $that->GetSubCategory($id)->category;
-        if(isset($result)){
-          if(isset($result->subCategoryList->subCategory)){
-            foreach ($result->subCategoryList->subCategory as $subCategory) {
-              if(isset($subCategory->name) && isset($subCategory->id)){
-                array_push($chunk, array(
-                  "category_name" => $subCategory->name,
-                  "category_id" => $subCategory->id,
-                ));
-              }
-              subShow($subCategory->id, $subCategory->name,$chunk, $that);
+    $categorys = [];
+  
+    function subShow($id, $categorys, $that){
+
+      $result = $that->GetSubCategory($id)->category;
+      if(isset($result)){
+        if(isset($result->subCategoryList->subCategory)){
+          foreach ($result->subCategoryList->subCategory as $subCategory) {
+            if(isset($subCategory->name) && isset($subCategory->id)){
+              array_push($categorys,array(
+                "category_name" => $subCategory->name,
+                "category_id" => $subCategory->id,
+                "parent_id" => ( isset($id) ? $id : 0)
+              ));
             }
+            echo 'sub';
+            subShow($subCategory->id, $categorys,$that);
           }
-        } else {
-          return null;
         }
+      } else {
+        return null;
       }
+    }
 
+    foreach ($toplevelcats as $cat) {
+      array_push($categorys, array(
+        "category_name" => $cat->name,
+        "category_id" => $cat->id
+      ));
+      echo 'top';
+      subShow($cat->id, $categorys,$this);
+    }
 
-     foreach ($toplevelcats as $cat) {
-      
-        array_push($categories,array(
-          "category_name" => $cat->name,
-          "category_id" => $cat->id
-        ));
+    return $categorys;
 
-        subShow($cat->id, $cat->name, $categories, $this);
-
-      }
-
-
-      return $categories;
 
   }
 
